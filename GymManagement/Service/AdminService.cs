@@ -17,12 +17,13 @@ namespace GymManagement.Service
         {
            return _context.Admins.FirstOrDefault(i => i.IsActive == true);
         }
-        public string AddAdmin(string name, string family, string userName, string password)
+        public bool AddAdmin(string name, string family, string userName,string nationalCode,
+            string birthDate, string password)
         {
             bool doesExist = _context.Admins.Any(i => i.UserName == userName);
             if (doesExist)
             {
-                return "این نام کاربری در سامانه وجود دارد.";
+                return false;
             }
 
             var admin = new Admin()
@@ -30,13 +31,15 @@ namespace GymManagement.Service
                 Name = name,
                 Family = family,
                 UserName = userName,
+                NationalCode = nationalCode,
+                BirthDate = birthDate,
                 Password = password,
                 CreateDate = DateTime.Now,
             };
 
             _context.Admins.Add(admin);
             _context.SaveChanges();
-            return "با موفقیت ثبت شد.";
+            return true;
         }
 
         public bool Login(string username, string password)

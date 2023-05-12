@@ -7,18 +7,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using GymManagement.Service;
 
 namespace GymManagement
 {
-    public partial class MenuUserControl : UserControl
+    public partial class Menu_UserControl : UserControl
     {
-        private readonly UserService _service = new UserService();
-        public MenuUserControl()
+        public Menu_UserControl()
         {
             InitializeComponent();
         }
-
-        
     }
 }

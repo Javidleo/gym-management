@@ -1,7 +1,10 @@
-﻿using GymManagement.DataSource;
+﻿using DocumentFormat.OpenXml.Drawing.Charts;
+using GymManagement.DataSource;
 using GymManagement.Model;
+using GymManagement.ViewModel;
 using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Data.Entity.Migrations;
 using System.Linq;
 
@@ -14,24 +17,30 @@ namespace GymManagement.Service
         {
             _context = new GymContext();
         }
-        public bool AddUser(string name, string family, string nationalCode, DateTime birthDate,
+        public bool AddUser(string name, string family, string nationalCode, string birthDate,
             List<InstallmentOption> options, int adminId)
         {
             if (_context.Users.Any(i => i.NationalCode == nationalCode))
                 return false;
 
-            double price = options.Sum(option => option.Price);
+            var periodOption = options.FirstOrDefault(i => i.Tag == OptionTag.Period);
+
+            var option = options.FirstOrDefault(i => i.Tag == OptionTag.Option);
+
+            double price = periodOption.Price + option.Price;
 
             var user = new User
             {
+                AdminId = adminId,
                 Name = name,
                 Family = family,
-                Installments = options,
+                PeriodId = periodOption.Id,
+                OptionId = option.Id,
                 CreateDate = DateTime.Now,
                 NationalCode = nationalCode,
                 BirthDate = birthDate,
                 DurationStart = DateTime.Now,
-                DurationEnd = CalculateDuration(options),
+                DurationEnd = CalculateDuration(periodOption),
                 Transactions = new List<Transaction>
                 {
                     new Transaction
@@ -43,17 +52,16 @@ namespace GymManagement.Service
                     }
                 }
             };
-
             _context.Users.Add(user);
+
             _context.SaveChanges();
 
             return true;
         }
 
-        private DateTime CalculateDuration(List<InstallmentOption> options)
+        public DateTime CalculateDuration(InstallmentOption option)
         {
-            var periodOptions = options.FirstOrDefault(i => i.Tag == OptionTag.Period);
-            switch (periodOptions.Title)
+            switch (option.Title)
             {
                 case "monthly":
                     return DateTime.Now.AddMonths(1);
@@ -82,21 +90,21 @@ namespace GymManagement.Service
             _context.SaveChanges();
         }
 
-        public void UpdateUser(int id, string name, string family, List<InstallmentOption> options, int adminId)
-        {
-            var user = _context.Users.Find(id);
+        //public void UpdateUser(int id, string name, string family, List<InstallmentOption> options, int adminId)
+        //{
+        //    var user = _context.Users.Find(id);
 
-            if (user == null) return;
+        //    if (user == null) return;
 
-            user.Name = name;
-            user.Family = family;
-            user.Installments = options;
-            user.CreateDate = DateTime.Now;
-            user.AdminId = adminId;
+        //    user.Name = name;
+        //    user.Family = family;
+        //    user.Installments = options;
+        //    user.CreateDate = DateTime.Now;
+        //    user.AdminId = adminId;
 
-            _context.Users.AddOrUpdate(user);
-            _context.SaveChanges();
-        }
+        //    _context.Users.AddOrUpdate(user);
+        //    _context.SaveChanges();
+        //}
 
         public User FindUser(int id)
         {
@@ -111,16 +119,36 @@ namespace GymManagement.Service
             return _context.Users.ToList();
         }
 
-        public void ChargeAccount(int id, DateTime start, DateTime end)
+        public bool ChargeAccount(int id, DateTime start, DateTime end, List<InstallmentOption> options, int adminId)
         {
-            var user = _context.Users.Find(id);
-            if (user == null) return;
+            var user = _context.Users.FirstOrDefault(i => i.Id == id);
+            if (user == null) return false;
+
+            var period = options.FirstOrDefault(i => i.Tag == OptionTag.Period);
+            var option = options.FirstOrDefault(i => i.Tag == OptionTag.Option);
 
             user.DurationStart = start;
             user.DurationEnd = end;
+            user.AdminId = adminId;
+            user.PeriodId = period.Id;
+            user.OptionId = option.Id;
 
             _context.Users.AddOrUpdate(user);
+
+            var transaction = new Transaction
+            {
+                AdminId = adminId,
+                UserId = id,
+                Price = options.Sum(i => i.Price),
+                Description = "باز تمدید شهریه",
+                Time = DateTime.Now,
+            };
+
+            _context.Transactions.Add(transaction);
+
             _context.SaveChanges();
+
+            return true;
         }
 
 

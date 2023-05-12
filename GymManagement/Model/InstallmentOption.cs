@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace GymManagement.Model
 {
@@ -10,6 +11,9 @@ namespace GymManagement.Model
         public OptionTag Tag { get; set; }
         public double Price { get; set; }
         public string Description { get; set; }
+
+        public virtual List<User> PeriodUsers { get; set; }
+        public virtual List<User> OptionUser { get; set; }
 
     }
 

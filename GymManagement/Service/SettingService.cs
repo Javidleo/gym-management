@@ -32,12 +32,12 @@ namespace GymManagement.Service
             _context.SaveChanges();
         }
 
-        public void UpdateSetting(int id, string name, double price, string description)
+        public bool UpdateSetting(string name, double price, string description)
         {
-            var option = _context.InstallmentOptions.FirstOrDefault(i => i.Id == id);
+            var option = _context.InstallmentOptions.FirstOrDefault(i => i.Title == name);
             if (option == null)
             {
-                return;
+                return false;
             }
 
             option.Description = description;
@@ -46,6 +46,7 @@ namespace GymManagement.Service
 
             _context.InstallmentOptions.AddOrUpdate(option);
             _context.SaveChanges();
+            return true;
         }
 
         public void RemoveSetting(int id)

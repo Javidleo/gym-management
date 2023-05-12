@@ -27,6 +27,8 @@
                         Name = c.String(),
                         IsActive = c.Boolean(nullable: false),
                         Family = c.String(),
+                        NationalCode = c.String(),
+                        BirthDate = c.String(),
                         UserName = c.String(),
                         Password = c.String(),
                         CreateDate = c.DateTime(nullable: false),
@@ -59,14 +61,20 @@
                         Family = c.String(),
                         CreateDate = c.DateTime(nullable: false),
                         NationalCode = c.String(),
-                        BirthDate = c.DateTime(nullable: false),
+                        BirthDate = c.String(),
                         DurationStart = c.DateTime(nullable: false),
                         DurationEnd = c.DateTime(nullable: false),
                         AdminId = c.Int(nullable: false),
+                        PeriodId = c.Int(nullable: false),
+                        OptionId = c.Int(nullable: false),
                     })
                 .PrimaryKey(t => t.Id)
                 .ForeignKey("dbo.Admins", t => t.AdminId)
-                .Index(t => t.AdminId);
+                .ForeignKey("dbo.InstallmentOptions", t => t.OptionId)
+                .ForeignKey("dbo.InstallmentOptions", t => t.PeriodId)
+                .Index(t => t.AdminId)
+                .Index(t => t.PeriodId)
+                .Index(t => t.OptionId);
             
             CreateTable(
                 "dbo.InstallmentOptions",
@@ -77,11 +85,8 @@
                         Tag = c.Int(nullable: false),
                         Price = c.Double(nullable: false),
                         Description = c.String(),
-                        User_Id = c.Int(),
                     })
-                .PrimaryKey(t => t.Id)
-                .ForeignKey("dbo.Users", t => t.User_Id)
-                .Index(t => t.User_Id);
+                .PrimaryKey(t => t.Id);
             
         }
         
@@ -89,10 +94,12 @@
         {
             DropForeignKey("dbo.AdminActivities", "AdminId", "dbo.Admins");
             DropForeignKey("dbo.Transactions", "UserId", "dbo.Users");
-            DropForeignKey("dbo.InstallmentOptions", "User_Id", "dbo.Users");
+            DropForeignKey("dbo.Users", "PeriodId", "dbo.InstallmentOptions");
+            DropForeignKey("dbo.Users", "OptionId", "dbo.InstallmentOptions");
             DropForeignKey("dbo.Users", "AdminId", "dbo.Admins");
             DropForeignKey("dbo.Transactions", "AdminId", "dbo.Admins");
-            DropIndex("dbo.InstallmentOptions", new[] { "User_Id" });
+            DropIndex("dbo.Users", new[] { "OptionId" });
+            DropIndex("dbo.Users", new[] { "PeriodId" });
             DropIndex("dbo.Users", new[] { "AdminId" });
             DropIndex("dbo.Transactions", new[] { "AdminId" });
             DropIndex("dbo.Transactions", new[] { "UserId" });

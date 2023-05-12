@@ -10,7 +10,7 @@ namespace GymManagement.Model
         public int Id { get; set; }
         public DateTime Time { get; set; }
         public int AdminId { get; set; }
-        
+
         [ForeignKey("AdminId")]
         public virtual Admin Admin { get; set; }
     }

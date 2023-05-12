@@ -17,7 +17,8 @@ namespace GymManagement.Model
         public DateTime CreateDate { get; set; }
 
         public string NationalCode { get; set; }
-        public DateTime BirthDate { get; set; }
+
+        public string BirthDate { get; set; }
 
 
         public DateTime DurationStart { get; set; }
@@ -29,7 +30,11 @@ namespace GymManagement.Model
         [ForeignKey("AdminId")]
         public virtual Admin Admin { get; set; }
 
-        public virtual List<InstallmentOption> Installments { get; set; }
+        public int PeriodId { get; set; }
+        public virtual InstallmentOption PeriodOption { get; set; }
+
+        public int OptionId { get; set; }
+        public virtual InstallmentOption Option { get; set; }
 
         public virtual List<Transaction> Transactions { get; set; }
     }
